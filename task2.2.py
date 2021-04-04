@@ -1,49 +1,68 @@
-def my_fun(string, scob, d):
+def my_fun(string, braket, d):
+    
+    CORRECTION_FLAG = True
+    BRAKET_WITH_MISTAKE = None
+    BRAKET_WITHOUT_CLOSING = None
+
+    answer = (CORRECTION_FLAG, BRAKET_WITH_MISTAKE, BRAKET_WITHOUT_CLOSING)
+    string_dict = {}
+
     k = d.keys()
     new_dict = {}
-    for i in range(len(scob)):
+    for i in range(len(braket)):
         for key in k:
-            if scob[i] == key:
-                new_dict.update({scob[i]: d.get(key)})
-    marker = []
-    ke = new_dict.keys()
-    mark = []
-    rezult = {}
+            if braket[i] == key:
+                new_dict.update({braket[i]: d.get(key)})
+    
+    stack = []
+    rezult = []
     for i in range(len(string)):
-        for key in ke:
+        el = []
+        el_rez = []
+        for key in new_dict.keys():
             if string[i] == key:
-                rez = []
-                rezult.update({i: key})
-                rez.append(i)
-                for j in range(i, len(string)):
-                    if string[j] == new_dict.get(key):
-                        rezult.update({j: new_dict.get(key)})
-                        rez.append(j)
-                        break
-                mark.append(rez)
-    if len(mark) == 1:
-        answer = (True, None, None)
-    elif len(mark) == 0:
-        answer  = "Скобка в последовательности не найдена..."
-    else:   
-        i = 0    
-        while i!= len(mark)-1:
-            if (mark[i][0] < mark[i+1][0] and mark[i][1] < mark[i+1][1] and mark[i][1] < mark[i+1][0]) or (mark[i][0] < mark[i+1][0] and mark[i][1] > mark[i+1][1]):
-                answer = (True, None, None)
-            elif mark[i][1] > mark[i+1][0] and mark[i][1] < mark[i+1][1]:
-                k = rezult.keys()
-                for key in k:
-                    if key == mark[i][1]:
-                        secvalue = (rezult.get(key), key)
-                    elif key == mark[i+1][0]:
-                        thivalue = (rezult.get(key), key)
-                answer = (False, secvalue, thivalue)
-            i+=1
+                el.append(i)
+                el.append(key)
+                stack.append(el)
+                rezult.append(el)
+                break
+            elif string[i] == new_dict.get(key) and stack[len(stack)-1][1] == key:
+                el.append(i)
+                el.append(new_dict.get(key))
+                rezult.append(el)
+                del stack[len(stack)-1]
+                break
+            elif ((string[i] == new_dict.get(key) and stack[len(stack)-1][1] != key)):
+                el.append(i)
+                el.append(new_dict.get(key))
+                rezult.append(el)
+                for i in range(len(rezult)):
+                    for j in range(len(stack)):
+                        if rezult[i] == stack[j]:
+                            CORRECTION_FLAG = False
+                            BRAKET_WITH_MISTAKE = (rezult[len(rezult)-1][1], rezult[len(rezult)-1][0])
+                            BRAKET_WITHOUT_CLOSING = (rezult[len(rezult)-2][1], rezult[len(rezult)-2][0])
+                            answer = (CORRECTION_FLAG, BRAKET_WITH_MISTAKE, BRAKET_WITHOUT_CLOSING)
+                            return answer
+    if len(stack) != 0:
+        for i in range(len(rezult)):
+            for j in range(len(stack)):
+                if rezult[i] == stack[j] and rezult[i+1] != stack[j]:
+                    CORRECTION_FLAG = False
+                    BRAKET_WITH_MISTAKE = (rezult[i+1][1], rezult[i+1][0])
+                    BRAKET_WITHOUT_CLOSING = (rezult[i][1], rezult[i][0])
+                    answer = (CORRECTION_FLAG, BRAKET_WITH_MISTAKE, BRAKET_WITHOUT_CLOSING)
     return answer
-
+    
 if __name__=="__main__":
-    string = list(input("Введите строку: "))
-    scob = list(input("Введите проверочную скобку: "))
-    d = {"[": "]", "(": ")", "<": ">", "{": "}"}   
-    answer = my_fun(string, scob, d)
-    print(answer)
+    string = list(input("Введите строку : "))
+    braket = list(input("Введите проверочную скобку: "))
+    for i in range(len(string)):
+        for j in range(len(braket)):
+            if string[i] == braket[j]:
+                d = {"[": "]", "(": ")", "<": ">", "{": "}"}   
+                answer = my_fun(string, braket, d)
+                print(answer)
+            else: 
+                print("Попробуй ввести для поиска те скобки, которые действительно есть в строке")
+        
